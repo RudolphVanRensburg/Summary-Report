@@ -24,14 +24,16 @@ df_death.columns = df_death.columns.str.strip()
 df_disability.columns = df_disability.columns.str.strip()
 df_underwriting.columns = df_underwriting.columns.str.strip()
 
-#Count Death Claims
+#Count cell contents
 funeral_Claim = df_death['Claim type'].astype(str).str.contains('funeral', case=False, na=False).sum()
 gla_Claim = df_death['Claim type'].astype(str).str.contains('GLA', case=False, na=False).sum()
 finalised_Funeral_Claim = df_death[df_death['Status of the Claim'].astype(str).str.contains('Paid', case=False, na=False)]['Claim type'].astype(str).str.contains('funeral', case=False, na=False).sum()
 finalised_Gla_Claim = df_death[df_death['Status of the Claim'].astype(str).str.contains('Paid', case=False, na=False)]['Claim type'].astype(str).str.contains('GLA', case=False, na=False).sum()
 disability_Claim = df_disability['Member'].count()
-#gla_Underwriting_Requested = df_underwriting[~df_underwriting['Decision'].astype(str).str.contains('', case=False, na=False)]['Benefit'].astype(str).str.contains('GLA', case=False, na=False).sum()
-#disability_Underwriting_Requested = df_underwriting[~df_underwriting['Benefit'].astype(str).str.contains('GLA', case=False, na=False)]['Benefit'].count()
+gla_Underwriting_Requested  = df_underwriting[df_underwriting['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & df_underwriting['Decision'].isna()].shape[0]
+disability_Underwriting_Requested  = df_underwriting[~df_underwriting['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & df_underwriting['Decision'].isna()].shape[0]
+gla_Underwriting_Decisioned  = df_underwriting[df_underwriting['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & df_underwriting['Decision'].notna()]['Decision'].count()
+disability_Underwriting_Decisioned  = df_underwriting[~df_underwriting['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & df_underwriting['Decision'].notna()]['Decision'].count()
 
 # Sheet names
 clients = ['Client 1', 'Client 2', 'Client 3']
@@ -55,8 +57,8 @@ def get_sheet_data():
     return [
         ['Claims','', '','','','','Underwriting','','','',''],
         ['', 'Funeral', 'Death', 'Disability', 'Notes', '', '', 'GLA', 'Disability', 'Notes'],
-        ['Received', funeral_Claim, gla_Claim, disability_Claim, '', '', 'Requested', 'TBC', 'TBC', ''],
-        ['Finalised', finalised_Funeral_Claim, finalised_Gla_Claim, 'TBC', '', '', 'Decisioned', 'TBC', 'TBC', ''],
+        ['Received', funeral_Claim, gla_Claim, disability_Claim, '', '', 'Requested', gla_Underwriting_Requested, disability_Underwriting_Requested, ''],
+        ['Finalised', finalised_Funeral_Claim, finalised_Gla_Claim, 'TBC', '', '', 'Decisioned', gla_Underwriting_Decisioned, disability_Underwriting_Decisioned, ''],
         [''],
         ['ADDITIONAL FEEDBACK/NOTES']
     ]
