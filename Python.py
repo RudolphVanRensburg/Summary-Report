@@ -1,8 +1,8 @@
 import os
 from datetime import datetime
-import pandas as pd
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, PatternFill
+import pandas as pd # type: ignore
+from openpyxl import Workbook # type: ignore
+from openpyxl.styles import Font, Alignment, PatternFill # type: ignore
 
 # Today's date for filename formatting (YYYYMMDD)
 today = datetime.now().strftime('%Y%m%d')
@@ -15,14 +15,19 @@ clients_config = {
         'Underwriting': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 1\Medical Underwriting.xlsx',
     },
     'Client 2': {
-        'Death': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 1\Death.xlsx',  # Should be Client 2 path
-        'Disability': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 1\Disability.xlsx',  # Should be Client 2 path
-        'Underwriting': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 1\Medical Underwriting.xlsx',  # Should be Client 2 path
+        'Death': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 2\Death.xlsx',  # Should be Client 2 path
+        'Disability': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 2\Disability.xlsx',  # Should be Client 2 path
+        'Underwriting': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 2\Medical Underwriting.xlsx',  # Should be Client 2 path
+    },
+    'Client 3': {
+        'Death': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 3\Death.xlsx',  # Should be Client 3 path
+        'Disability': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 3\Disability.xlsx',  # Should be Client 3 path
+        'Underwriting': r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\Client 3\Medical Underwriting.xlsx',  # Should be Client 3 path
     }
 }
 
 # Output file directory and name
-file_directory = r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report'
+file_directory = r'C:\Users\Rudolph Van Rensburg\Desktop\KHUSA\Clarissa Summary Report\01 - Summary Reports'
 filename = f'{today} - Claims & Underwriting Summarized Reporting.xlsx'
 file_path = os.path.join(file_directory, filename)
 
@@ -75,7 +80,7 @@ def get_sheet_data(stats):
         ['Claims', '', '', '', '', '', 'Underwriting', '', '', ''],
         ['', 'Funeral', 'Death', 'Disability', 'Notes', '', '', 'GLA', 'Disability', 'Notes'],
         ['Received', stats['funeral_claims'], stats['gla_claims'], stats['disability_claims'], '', '', 'Requested', stats['gla_requested'], stats['disability_requested'], ''],
-        ['Finalised', stats['finalised_funeral'], stats['finalised_gla'], 'TBC', '', '', 'Decisioned', stats['gla_decisioned'], stats['disability_decisioned'], ''],
+        ['Finalised', stats['finalised_funeral'], stats['finalised_gla'], 'N/A', '', '', 'Decisioned', stats['gla_decisioned'], stats['disability_decisioned'], ''],
         [''],
         ['ADDITIONAL FEEDBACK/NOTES']
     ]
