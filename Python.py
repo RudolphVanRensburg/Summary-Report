@@ -43,16 +43,22 @@ def process_client_data(paths):
     disability_df = clean_columns(pd.read_excel(paths['Disability']))
     underwriting_df = clean_columns(pd.read_excel(paths['Underwriting']))
 
+    #Convert the column to datetime if needed
+    disability_df['Next Review Due'] = pd.to_datetime(disability_df['Next Review Due'], errors='coerce')
+
     # Claims summary
     funeral_claims = death_df['Claim type'].astype(str).str.contains('funeral', case=False, na=False).sum()
     gla_claims = death_df['Claim type'].astype(str).str.contains('GLA', case=False, na=False).sum()
-    finalised_funeral = death_df[death_df['Status of the Claim'].astype(str).str.contains('Paid', case=False, na=False)]['Claim type'].astype(str).str.contains('funeral', case=False, na=False).sum()
-    finalised_gla = death_df[death_df['Status of the Claim'].astype(str).str.contains('Paid', case=False, na=False)]['Claim type'].astype(str).str.contains('GLA', case=False, na=False).sum()
+    finalised_funeral = death_df[death_df['Status of the Claim'].astype(str).str.contains('Paid|Rejected', case=False, na=False)]['Claim type'].astype(str).str.contains('funeral', case=False, na=False).sum()
+    finalised_gla = death_df[death_df['Status of the Claim'].astype(str).str.contains('Paid|Rejected', case=False, na=False)]['Claim type'].astype(str).str.contains('GLA', case=False, na=False).sum()
     disability_claims = disability_df['Member'].count()
+    finalised_disability = disability_df['DECISION'].astype(str).str.strip().str.lower().str.contains('approved|rejected|closed', na=False).sum()
+    disablity_next_review = disability_df['Next Review Due'].notna().sum()
+
 
     # Underwriting summary
-    gla_requested = underwriting_df[underwriting_df['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & underwriting_df['Decision'].isna()].shape[0]
-    disability_requested = underwriting_df[~underwriting_df['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & underwriting_df['Decision'].isna()].shape[0]
+    gla_requested = underwriting_df[underwriting_df['Benefit'].astype(str).str.contains('GLA', case=False, na=False)].shape[0]
+    disability_requested = underwriting_df[~underwriting_df['Benefit'].astype(str).str.contains('GLA', case=False, na=False)].shape[0]
     gla_decisioned = underwriting_df[underwriting_df['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & underwriting_df['Decision'].notna()]['Decision'].count()
     disability_decisioned = underwriting_df[~underwriting_df['Benefit'].astype(str).str.contains('GLA', case=False, na=False) & underwriting_df['Decision'].notna()]['Decision'].count()
 
@@ -66,6 +72,8 @@ def process_client_data(paths):
         'disability_requested': disability_requested,
         'gla_decisioned': gla_decisioned,
         'disability_decisioned': disability_decisioned,
+        'finalised_disability' : finalised_disability,
+        'disablity_next_review': disablity_next_review,
     }
 
 def format_header_cell(cell):
@@ -80,7 +88,8 @@ def get_sheet_data(stats):
         ['Claims', '', '', '', '', '', 'Underwriting', '', '', ''],
         ['', 'Funeral', 'Death', 'Disability', 'Notes', '', '', 'GLA', 'Disability', 'Notes'],
         ['Received', stats['funeral_claims'], stats['gla_claims'], stats['disability_claims'], '', '', 'Requested', stats['gla_requested'], stats['disability_requested'], ''],
-        ['Finalised', stats['finalised_funeral'], stats['finalised_gla'], 'N/A', '', '', 'Decisioned', stats['gla_decisioned'], stats['disability_decisioned'], ''],
+        ['Finalised', stats['finalised_funeral'], stats['finalised_gla'],  stats['finalised_disability'], '', '', 'Decisioned', stats['gla_decisioned'], stats['disability_decisioned'], ''],
+        ['Upcomming Reviews', 'N/A', 'N/A', stats['disablity_next_review'], '', '', '', '', '', ''],
         [''],
         ['ADDITIONAL FEEDBACK/NOTES']
     ]
@@ -104,11 +113,12 @@ for client_name, file_paths in clients_config.items():
     # Merge header cells and format them
     sheet.merge_cells('A1:E1')
     sheet.merge_cells('G1:J1')
-    sheet.merge_cells('A6:J6')
+    sheet.merge_cells('A7:J7')
     format_header_cell(sheet['A1'])
     format_header_cell(sheet['G1'])
-    format_header_cell(sheet['A6'])
+    format_header_cell(sheet['A7'])
 
 # Save the workbook to file
 workbook.save(file_path)
 print("File saved:", file_path)
+
